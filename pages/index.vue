@@ -1,12 +1,13 @@
 <template>
   <div class="container mx-auto p-24">
+    <h1 class="text-center text-3xl">Covid App</h1>
     <select class="select select-bordered w-full max-w-xs" v-model="country">
       <option value="" disabled selected>Choose country</option>
       <option v-for="(item, index) in countries" :key="index" :value="item">
         {{ item.name.common }}
       </option>
     </select>
-    <div class="grid grid-cols-2 mt-5">
+    <div class="grid grid-cols-2 gap-10 mt-5 h-[500px]">
       <div class="col-span-1">
         <div class="w-full h-[500px]">
           <client-only>
@@ -18,13 +19,15 @@
         </div>
       </div>
       <div class="col-span-1">
-        <!-- <highchart :options="chartOptions"></highchart> -->
+        <Tutorial :series="dataCovid" :categories="['2020', '2021', '2022', '2023', '2024']" v-if="dataCovid" />
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import Tutorial from '../components/Tutorial.vue'
+
 export default {
   name: 'IndexPage',
   data() {
@@ -34,91 +37,6 @@ export default {
       countries: [],
       dataCovid: null,
       latLng: [0, 0],
-      chartOptions: {
-        chart: {
-          polar: false,
-          height: "800px",
-        },
-
-        title: {
-          text: "Pairs",
-        },
-
-        accessibility: {
-          point: {
-            valueDescriptionFormat:
-              "{index}. From {point.from} to {point.to}: {point.weight}.",
-          },
-        },
-
-        series: [
-          {
-            keys: ["from", "to", "weight"],
-            data: [
-              ["Brazil", "Portugal", 5],
-              ["Brazil", "France", 1],
-              ["Brazil", "Spain", 1],
-              ["Brazil", "England", 1],
-              ["Canada", "Portugal", 1],
-              ["Canada", "France", 5],
-              ["Canada", "England", 1],
-              ["Mexico", "Portugal", 1],
-              ["Mexico", "France", 1],
-              ["Mexico", "Spain", 5],
-              ["Mexico", "England", 1],
-              ["USA", "Portugal", 1],
-              ["USA", "France", 1],
-              ["USA", "Spain", 1],
-              ["USA", "England", 5],
-              ["Portugal", "Angola", 2],
-              ["Portugal", "Senegal", 1],
-              ["Portugal", "Morocco", 1],
-              ["Portugal", "South Africa", 3],
-              ["France", "Angola", 1],
-              ["France", "Senegal", 3],
-              ["France", "Mali", 3],
-              ["France", "Morocco", 3],
-              ["France", "South Africa", 1],
-              ["Spain", "Senegal", 1],
-              ["Spain", "Morocco", 3],
-              ["Spain", "South Africa", 1],
-              ["England", "Angola", 1],
-              ["England", "Senegal", 1],
-              ["England", "Morocco", 2],
-              ["England", "South Africa", 7],
-              ["South Africa", "China", 5],
-              ["South Africa", "India", 1],
-              ["South Africa", "Japan", 3],
-              ["Angola", "China", 5],
-              ["Angola", "India", 1],
-              ["Angola", "Japan", 3],
-              ["Senegal", "China", 5],
-              ["Senegal", "India", 1],
-              ["Senegal", "Japan", 3],
-              ["Mali", "China", 5],
-              ["Mali", "India", 1],
-              ["Mali", "Japan", 3],
-              ["Morocco", "China", 5],
-              ["Morocco", "India", 1],
-              ["Morocco", "Japan", 3],
-              ["Japan", "Brazil", 1],
-            ],
-            type: "dependencywheel",
-            name: "Pairs",
-            dataLabels: {
-              color: "#333",
-              textPath: {
-                enabled: true,
-                attributes: {
-                  dy: 5,
-                },
-              },
-              distance: 10,
-            },
-            size: "95%",
-          },
-        ],
-      },
     }
   },
   methods: {
@@ -156,8 +74,13 @@ export default {
           new: 0,
         },
       }
+      // const years = ['2020', '2021', '2022', '2023', '2024']
       const body = await response.json()
       const { cases } = body[0]
+      const series = {
+        latest: [],
+        total: [],
+      }
 
       // console.log(cases)
 
@@ -172,8 +95,13 @@ export default {
         }
       }
 
+      for (const item in years) {
+        series.latest.push(years[item].new)
+        series.total.push(years[item].total)
+      }
+
       this.latLng = this.country.latlng
-      this.dataCovid = years
+      this.dataCovid = series
     }
   },
   watch: {
